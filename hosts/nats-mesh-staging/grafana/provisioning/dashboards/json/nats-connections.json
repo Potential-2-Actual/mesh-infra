@@ -1,81 +1,78 @@
 {
-  "dashboard": {
-    "uid": "nats-connections",
-    "title": "NATS Connections & Routes",
-    "tags": ["nats", "mesh", "agents"],
-    "timezone": "browser",
-    "refresh": "30s",
-    "time": { "from": "now-6h", "to": "now" },
-    "templating": { "list": [] },
-    "panels": [
-      {
-        "id": 1,
-        "title": "Connections Over Time",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
-        "targets": [
-          { "expr": "gnatsd_connz_total_connections", "legendFormat": "total connections" },
-          { "expr": "gnatsd_varz_connections", "legendFormat": "active" }
-        ],
-        "datasource": { "uid": "P4169E866C3094E38" }
-      },
-      {
-        "id": 2,
-        "title": "Per-Connection Messages In/s",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
-        "targets": [
-          { "expr": "rate(gnatsd_connz_in_msgs[5m])", "legendFormat": "{{server_id}} - {{cid}}" }
-        ],
-        "fieldConfig": { "defaults": { "unit": "short" } },
-        "datasource": { "uid": "P4169E866C3094E38" }
-      },
-      {
-        "id": 3,
-        "title": "Per-Connection Messages Out/s",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
-        "targets": [
-          { "expr": "rate(gnatsd_connz_out_msgs[5m])", "legendFormat": "{{server_id}} - {{cid}}" }
-        ],
-        "fieldConfig": { "defaults": { "unit": "short" } },
-        "datasource": { "uid": "P4169E866C3094E38" }
-      },
-      {
-        "id": 4,
-        "title": "Per-Connection Subscriptions",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
-        "targets": [
-          { "expr": "gnatsd_connz_subscriptions", "legendFormat": "{{server_id}} - {{cid}}" }
-        ],
-        "datasource": { "uid": "P4169E866C3094E38" }
-      },
-      {
-        "id": 5,
-        "title": "Pending Bytes (backpressure)",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
-        "targets": [
-          { "expr": "gnatsd_connz_pending_bytes", "legendFormat": "{{server_id}} - {{cid}}" }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "bytes",
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                { "color": "green", "value": null },
-                { "color": "yellow", "value": 1048576 },
-                { "color": "red", "value": 10485760 }
-              ]
-            }
+  "uid": "nats-connections",
+  "title": "NATS Connections & Routes",
+  "tags": ["nats", "mesh", "agents"],
+  "timezone": "browser",
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Connections Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "gnatsd_connz_total_connections", "legendFormat": "total connections" },
+        { "expr": "gnatsd_varz_connections", "legendFormat": "active" }
+      ],
+      "datasource": { "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 2,
+      "title": "Per-Connection Messages In/s",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "rate(gnatsd_connz_in_msgs[5m])", "legendFormat": "{{server_id}} - {{cid}}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "datasource": { "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 3,
+      "title": "Per-Connection Messages Out/s",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        { "expr": "rate(gnatsd_connz_out_msgs[5m])", "legendFormat": "{{server_id}} - {{cid}}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "datasource": { "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 4,
+      "title": "Per-Connection Subscriptions",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+      "targets": [
+        { "expr": "gnatsd_connz_subscriptions", "legendFormat": "{{server_id}} - {{cid}}" }
+      ],
+      "datasource": { "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 5,
+      "title": "Pending Bytes (backpressure)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
+      "targets": [
+        { "expr": "gnatsd_connz_pending_bytes", "legendFormat": "{{server_id}} - {{cid}}" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1048576 },
+              { "color": "red", "value": 10485760 }
+            ]
           }
-        },
-        "datasource": { "uid": "P4169E866C3094E38" }
-      }
-    ],
-    "schemaVersion": 39
-  },
-  "overwrite": true
+        }
+      },
+      "datasource": { "uid": "P4169E866C3094E38" }
+    }
+  ],
+  "schemaVersion": 39
 }
