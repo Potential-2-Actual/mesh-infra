@@ -1,0 +1,175 @@
+{
+  "uid": "nats-overview",
+  "title": "NATS Server Overview",
+  "tags": ["nats", "mesh"],
+  "timezone": "browser",
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Connections",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "targets": [{ "expr": "gnatsd_varz_connections", "legendFormat": "Active" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 20}, {"color": "red", "value": 50}] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 2,
+      "title": "Memory Usage",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "targets": [{ "expr": "gnatsd_varz_mem", "legendFormat": "Bytes" }],
+      "fieldConfig": { "defaults": { "unit": "bytes", "thresholds": { "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 104857600}, {"color": "red", "value": 524288000}] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 3,
+      "title": "CPU Usage",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "targets": [{ "expr": "gnatsd_varz_cpu", "legendFormat": "CPU %" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "thresholds": { "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 50}, {"color": "red", "value": 80}] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 4,
+      "title": "Uptime",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "targets": [{ "expr": "gnatsd_varz_uptime", "legendFormat": "Seconds" }],
+      "fieldConfig": { "defaults": { "unit": "s", "thresholds": { "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 3600}, {"color": "green", "value": 86400}] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 5,
+      "title": "Total Connections",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "targets": [{ "expr": "gnatsd_varz_total_connections", "legendFormat": "Total" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{"color": "green", "value": null}] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 6,
+      "title": "Slow Consumers",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "targets": [{ "expr": "gnatsd_varz_slow_consumers", "legendFormat": "Slow" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 10,
+      "title": "Messages In / Out (rate)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        { "expr": "rate(gnatsd_varz_in_msgs[1m])", "legendFormat": "Messages In/s" },
+        { "expr": "rate(gnatsd_varz_out_msgs[1m])", "legendFormat": "Messages Out/s" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "msg/s", "custom": { "drawStyle": "line", "fillOpacity": 10, "pointSize": 5, "lineWidth": 2 } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 11,
+      "title": "Bytes In / Out (rate)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        { "expr": "rate(gnatsd_varz_in_bytes[1m])", "legendFormat": "Bytes In/s" },
+        { "expr": "rate(gnatsd_varz_out_bytes[1m])", "legendFormat": "Bytes Out/s" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "Bps", "custom": { "drawStyle": "line", "fillOpacity": 10, "pointSize": 5, "lineWidth": 2 } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 20,
+      "title": "JetStream Streams",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 12 },
+      "targets": [{ "expr": "gnatsd_jsz_streams", "legendFormat": "Streams" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{"color": "blue", "value": null}] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 21,
+      "title": "JetStream Consumers",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 12 },
+      "targets": [{ "expr": "gnatsd_jsz_consumers", "legendFormat": "Consumers" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{"color": "blue", "value": null}] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 22,
+      "title": "JetStream Messages",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 12 },
+      "targets": [{ "expr": "gnatsd_jsz_messages", "legendFormat": "Messages" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{"color": "blue", "value": null}] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 23,
+      "title": "JetStream Storage",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 12 },
+      "targets": [{ "expr": "gnatsd_jsz_store_bytes", "legendFormat": "Storage" }],
+      "fieldConfig": { "defaults": { "unit": "bytes", "thresholds": { "steps": [{"color": "blue", "value": null}, {"color": "yellow", "value": 536870912}, {"color": "red", "value": 1073741824}] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 30,
+      "title": "Connections Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "targets": [
+        { "expr": "gnatsd_varz_connections", "legendFormat": "Active Connections" }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 20, "pointSize": 5, "lineWidth": 2 } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 31,
+      "title": "Memory Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "targets": [
+        { "expr": "gnatsd_varz_mem", "legendFormat": "NATS Memory" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "bytes", "custom": { "drawStyle": "line", "fillOpacity": 20, "pointSize": 5, "lineWidth": 2 } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 40,
+      "title": "Subscriptions",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 24 },
+      "targets": [{ "expr": "gnatsd_varz_subscriptions", "legendFormat": "Subscriptions" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{"color": "purple", "value": null}] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 41,
+      "title": "Messages In (total)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 24 },
+      "targets": [{ "expr": "gnatsd_varz_in_msgs", "legendFormat": "Total In" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{"color": "green", "value": null}] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 42,
+      "title": "Messages Out (total)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 24 },
+      "targets": [{ "expr": "gnatsd_varz_out_msgs", "legendFormat": "Total Out" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{"color": "green", "value": null}] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    }
+  ],
+  "schemaVersion": 39,
+  "version": 1
+}
