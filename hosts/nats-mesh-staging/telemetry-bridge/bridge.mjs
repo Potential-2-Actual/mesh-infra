@@ -46,27 +46,26 @@ function telemetryToPrometheus(data) {
     lines.push(`mesh_agent_subagents_completed{${labels}} ${data.subAgents.completed ?? 0} ${ts}`);
   }
 
-  // Enriched metrics (from POT-153 when available)
-  if (data.messagesSent !== undefined) {
-    lines.push(`mesh_agent_messages_sent_total{${labels}} ${data.messagesSent} ${ts}`);
+  // Messages (nested: data.messages.sent/received/errors)
+  if (data.messages) {
+    if (data.messages.sent !== undefined) lines.push(`mesh_agent_messages_sent_total{${labels}} ${data.messages.sent} ${ts}`);
+    if (data.messages.received !== undefined) lines.push(`mesh_agent_messages_received_total{${labels}} ${data.messages.received} ${ts}`);
+    if (data.messages.errors !== undefined) lines.push(`mesh_agent_errors_total{${labels}} ${data.messages.errors} ${ts}`);
   }
-  if (data.messagesReceived !== undefined) {
-    lines.push(`mesh_agent_messages_received_total{${labels}} ${data.messagesReceived} ${ts}`);
+
+  // Tokens (nested: data.tokens.totalInput/totalOutput/last24hInput/last24hOutput)
+  if (data.tokens) {
+    if (data.tokens.totalInput !== undefined) lines.push(`mesh_agent_tokens_input_total{${labels}} ${data.tokens.totalInput} ${ts}`);
+    if (data.tokens.totalOutput !== undefined) lines.push(`mesh_agent_tokens_output_total{${labels}} ${data.tokens.totalOutput} ${ts}`);
+    if (data.tokens.last24hInput !== undefined) lines.push(`mesh_agent_tokens_24h_input{${labels}} ${data.tokens.last24hInput} ${ts}`);
+    if (data.tokens.last24hOutput !== undefined) lines.push(`mesh_agent_tokens_24h_output{${labels}} ${data.tokens.last24hOutput} ${ts}`);
   }
-  if (data.errors !== undefined) {
-    lines.push(`mesh_agent_errors_total{${labels}} ${data.errors} ${ts}`);
-  }
-  if (data.tokensBurned !== undefined) {
-    lines.push(`mesh_agent_tokens_burned_total{${labels}} ${data.tokensBurned} ${ts}`);
-  }
-  if (data.avgResponseMs !== undefined) {
-    lines.push(`mesh_agent_avg_response_ms{${labels}} ${data.avgResponseMs} ${ts}`);
-  }
-  if (data.cpuPercent !== undefined) {
-    lines.push(`mesh_agent_cpu_percent{${labels}} ${data.cpuPercent} ${ts}`);
-  }
-  if (data.memoryMb !== undefined) {
-    lines.push(`mesh_agent_memory_mb{${labels}} ${data.memoryMb} ${ts}`);
+
+  // System metrics (nested: data.system.cpuPercent/memoryMB/memoryPercent)
+  if (data.system) {
+    if (data.system.cpuPercent !== undefined) lines.push(`mesh_agent_cpu_percent{${labels}} ${data.system.cpuPercent} ${ts}`);
+    if (data.system.memoryMB !== undefined) lines.push(`mesh_agent_memory_mb{${labels}} ${data.system.memoryMB} ${ts}`);
+    if (data.system.memoryPercent !== undefined) lines.push(`mesh_agent_memory_percent{${labels}} ${data.system.memoryPercent} ${ts}`);
   }
 
   // Always emit an "up" gauge
