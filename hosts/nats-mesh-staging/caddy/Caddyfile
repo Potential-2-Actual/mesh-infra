@@ -4,6 +4,11 @@
         reverse_proxy nats:9222
     }
 
+    # Grafana
+    handle_path /grafana* {
+        reverse_proxy grafana:3000
+    }
+
     # Mesh Dashboard
     handle {
         reverse_proxy dashboard:3000
