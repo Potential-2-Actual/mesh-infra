@@ -7,20 +7,18 @@ services:
     container_name: nats
     restart: unless-stopped
     ports:
-      - "4222:4222"     # Client
-      - "6222:6222"     # Cluster
-      - "8222:8222"     # Monitoring
-      - "9222:9222"     # WebSocket
+      - "4222:4222"     # Client (external agents connect here)
+      - "8222:8222"     # Monitoring HTTP
     volumes:
       - ./nats/nats-server.conf:/etc/nats/nats-server.conf:ro
-      - ./nats/nkeys/:/etc/nats/nkeys/:ro
-      - nats-data:/data/jetstream
+      - nats-data:/data/nats
     command: ["-c", "/etc/nats/nats-server.conf"]
     healthcheck:
-      test: ["CMD", "nats-server", "--signal", "ldm=0"]
-      interval: 30s
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8222/healthz"]
+      interval: 15s
       timeout: 5s
       retries: 3
+      start_period: 10s
 
   dashboard:
     build:
