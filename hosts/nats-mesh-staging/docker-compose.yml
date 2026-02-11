@@ -67,6 +67,23 @@ services:
       timeout: 5s
       retries: 3
 
+  # Telemetry bridge: NATS KV → VictoriaMetrics
+  telemetry-bridge:
+    build:
+      context: ./telemetry-bridge
+    container_name: telemetry-bridge
+    restart: unless-stopped
+    environment:
+      - NATS_URL=nats://nats:4222
+      - NATS_SEED=${DASHBOARD_NATS_SERVER_SEED}
+      - VM_URL=http://victoriametrics:8428
+      - POLL_INTERVAL_MS=30000
+    depends_on:
+      nats:
+        condition: service_healthy
+      victoriametrics:
+        condition: service_healthy
+
   # Observability
   nats-exporter:
     image: natsio/prometheus-nats-exporter:latest
