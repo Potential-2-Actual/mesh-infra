@@ -1,2 +1,22 @@
-# Placeholder — will be populated in Story 4 (Dockerize Caddy)
-# See current production config at /etc/caddy/Caddyfile on nats-mesh-staging
+{$DOMAIN:mesh.potential2actual.com} {
+    # NATS WebSocket endpoint
+    handle_path /nats {
+        reverse_proxy nats:9222
+    }
+
+    # Mesh Dashboard
+    handle {
+        reverse_proxy dashboard:3000
+    }
+
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    log {
+        output stdout
+        format json
+    }
+}
