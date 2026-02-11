@@ -22,8 +22,8 @@ services:
 
   dashboard:
     build:
-      context: .
-      dockerfile: dashboard/Dockerfile
+      context: ${DASHBOARD_SRC_PATH:-/opt/mesh-dashboard}
+      dockerfile: ${PWD}/dashboard/Dockerfile
     container_name: mesh-dashboard
     restart: unless-stopped
     ports:
