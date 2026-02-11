@@ -1,0 +1,189 @@
+{
+  "uid": "agent-health",
+  "title": "Agent Health & Performance",
+  "tags": ["mesh", "agents", "telemetry"],
+  "timezone": "browser",
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "agent",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" },
+        "query": "label_values(mesh_agent_up, agent)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "text": "All", "value": "$__all" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Agent Status",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "expr": "mesh_agent_up{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [{ "type": "value", "options": { "1": { "text": "UP", "color": "green" }, "0": { "text": "DOWN", "color": "red" } } }],
+          "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+        }
+      },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 2,
+      "title": "Uptime",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [{ "expr": "mesh_agent_uptime_seconds{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": { "defaults": { "unit": "s", "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 3600 }, { "color": "green", "value": 86400 }] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 3,
+      "title": "Active Sessions",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "targets": [{ "expr": "mesh_agent_sessions_active{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "blue", "value": null }, { "color": "yellow", "value": 10 }, { "color": "red", "value": 20 }] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 4,
+      "title": "Total Sessions",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "targets": [{ "expr": "mesh_agent_sessions_total{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "blue", "value": null }] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 10,
+      "title": "Active Sessions Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [{ "expr": "mesh_agent_sessions_active{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 15, "lineWidth": 2, "pointSize": 5 } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 11,
+      "title": "Uptime Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [{ "expr": "mesh_agent_uptime_seconds{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": { "defaults": { "unit": "s", "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2 } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 20,
+      "title": "Messages Sent (total)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 12 },
+      "targets": [{ "expr": "mesh_agent_messages_sent_total{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2 } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 21,
+      "title": "Messages Received (total)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 12 },
+      "targets": [{ "expr": "mesh_agent_messages_received_total{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2 } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 22,
+      "title": "Errors (total)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 12 },
+      "targets": [{ "expr": "mesh_agent_errors_total{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2 },
+          "color": { "mode": "fixed", "fixedColor": "red" }
+        }
+      },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 30,
+      "title": "Token Burn — Last 24h (Input)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 20 },
+      "targets": [{ "expr": "mesh_agent_tokens_24h_input{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": { "defaults": { "unit": "short", "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 100000 }, { "color": "red", "value": 500000 }] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 31,
+      "title": "Token Burn — Last 24h (Output)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 20 },
+      "targets": [{ "expr": "mesh_agent_tokens_24h_output{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": { "defaults": { "unit": "short", "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 200000 }, { "color": "red", "value": 1000000 }] } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 32,
+      "title": "Total Tokens (Input)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "targets": [{ "expr": "mesh_agent_tokens_input_total{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2 } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 33,
+      "title": "Total Tokens (Output)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "targets": [{ "expr": "mesh_agent_tokens_output_total{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2 } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 40,
+      "title": "CPU Usage (%)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+      "targets": [{ "expr": "mesh_agent_cpu_percent{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 15, "lineWidth": 2 } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 41,
+      "title": "Memory Usage (MB)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
+      "targets": [{ "expr": "mesh_agent_memory_mb{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": { "defaults": { "unit": "decmbytes", "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 15, "lineWidth": 2 } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 50,
+      "title": "Sub-Agents Running",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 40 },
+      "targets": [{ "expr": "mesh_agent_subagents_running{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "bars", "fillOpacity": 50, "lineWidth": 1 } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    },
+    {
+      "id": 51,
+      "title": "Sub-Agents Completed (cumulative)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 40 },
+      "targets": [{ "expr": "mesh_agent_subagents_completed{agent=~\"$agent\"}", "legendFormat": "{{agent}}" }],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2 } } },
+      "datasource": { "type": "prometheus", "uid": "P4169E866C3094E38" }
+    }
+  ],
+  "schemaVersion": 39,
+  "version": 1
+}
