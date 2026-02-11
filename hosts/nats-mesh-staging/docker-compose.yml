@@ -35,6 +35,8 @@ services:
       - GOOGLE_CLIENT_SECRET=${DASHBOARD_GOOGLE_CLIENT_SECRET}
       - SESSION_SECRET=${DASHBOARD_SESSION_SECRET}
       - HMAC_SECRET=${DASHBOARD_HMAC_SECRET}
+      - DASHBOARD_BROWSER_SEED=${DASHBOARD_BROWSER_SEED}
+      - ALLOWED_EMAILS=${ALLOWED_EMAILS}
       - ORIGIN=https://${DOMAIN}
     depends_on:
       nats:
@@ -66,17 +68,33 @@ services:
       retries: 3
 
   # Observability
+  nats-exporter:
+    image: natsio/prometheus-nats-exporter:latest
+    container_name: nats-exporter
+    restart: unless-stopped
+    command:
+      - "-varz"
+      - "-connz"
+      - "-jsz=all"
+      - "-subz"
+      - "http://nats:8222"
+    depends_on:
+      nats:
+        condition: service_healthy
+
   victoriametrics:
     image: victoriametrics/victoria-metrics:v1.108.1
     container_name: victoriametrics
     restart: unless-stopped
     volumes:
       - vm-data:/victoria-metrics-data
+      - ./victoriametrics/promscrape.yml:/etc/promscrape.yml:ro
     command:
       - "-retentionPeriod=90d"
       - "-httpListenAddr=:8428"
+      - "-promscrape.config=/etc/promscrape.yml"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8428/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8428/health"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -100,7 +118,7 @@ services:
       victoriametrics:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:3000/api/health || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
