@@ -1,0 +1,7 @@
+scrape_configs:
+  - job_name: nats
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["nats-exporter:7777"]
+        labels:
+          instance: nats-mesh-staging
