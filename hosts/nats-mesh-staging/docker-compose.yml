@@ -1,0 +1,83 @@
+# nats-mesh-staging — Agent Mesh hub
+# Services: NATS, Dashboard, Caddy
+
+services:
+  nats:
+    image: nats:2.10-alpine
+    container_name: nats
+    restart: unless-stopped
+    ports:
+      - "4222:4222"     # Client
+      - "6222:6222"     # Cluster
+      - "8222:8222"     # Monitoring
+      - "9222:9222"     # WebSocket
+    volumes:
+      - ./nats/nats-server.conf:/etc/nats/nats-server.conf:ro
+      - ./nats/nkeys/:/etc/nats/nkeys/:ro
+      - nats-data:/data/jetstream
+    command: ["-c", "/etc/nats/nats-server.conf"]
+    healthcheck:
+      test: ["CMD", "nats-server", "--signal", "ldm=0"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile
+    container_name: mesh-dashboard
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      - NATS_URL=nats://nats:4222
+      - NATS_SERVER_SEED=${DASHBOARD_NATS_SERVER_SEED}
+      - GOOGLE_CLIENT_ID=${DASHBOARD_GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${DASHBOARD_GOOGLE_CLIENT_SECRET}
+      - SESSION_SECRET=${DASHBOARD_SESSION_SECRET}
+      - HMAC_SECRET=${DASHBOARD_HMAC_SECRET}
+      - ORIGIN=https://${DOMAIN}
+    depends_on:
+      nats:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - dashboard
+      - nats
+    healthcheck:
+      test: ["CMD", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+
+  # Observability (Sprint 19)
+  # victoriametrics:
+  #   image: victoriametrics/victoria-metrics:latest
+  #   profiles: ["observability"]
+  #   ...
+  # grafana:
+  #   image: grafana/grafana-oss:latest
+  #   profiles: ["observability"]
+  #   ...
+
+volumes:
+  nats-data:
+  caddy-data:
+  caddy-config:
