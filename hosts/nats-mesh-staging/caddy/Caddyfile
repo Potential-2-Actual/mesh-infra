@@ -1,15 +1,22 @@
+# Grafana — DNS points to Tailscale IP, so only VPN clients can reach this
+http://grafana.potential2actual.com {
+    reverse_proxy grafana:3000
+
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+    }
+
+    log {
+        output stdout
+        format json
+    }
+}
+
 {$DOMAIN:mesh.potential2actual.com} {
     # NATS WebSocket endpoint
     handle_path /nats {
         reverse_proxy nats:9222
-    }
-
-    # Grafana (serve_from_sub_path=true, keep /grafana prefix)
-    handle /grafana/* {
-        reverse_proxy grafana:3000
-    }
-    handle /grafana {
-        redir /grafana/ permanent
     }
 
     # Mesh Dashboard
