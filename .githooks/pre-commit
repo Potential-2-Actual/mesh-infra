@@ -1,0 +1,18 @@
+#!/bin/sh
+# Enforce branch naming convention: must contain POT-XXX reference
+# Exceptions: main, develop, release/*, hotfix/*
+
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+
+case "$branch" in
+  main|develop|release/*|hotfix/*)
+    exit 0
+    ;;
+esac
+
+if ! echo "$branch" | grep -qiE 'POT-[0-9]+'; then
+  echo "❌ Branch name '$branch' missing POT-XXX reference."
+  echo "   Use: feat/POT-123-short-desc or fix/POT-123-short-desc"
+  echo "   Bypass with: git commit --no-verify"
+  exit 1
+fi
