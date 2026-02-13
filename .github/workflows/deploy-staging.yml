@@ -1,0 +1,118 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy via IAP tunnel
+        env:
+          DASHBOARD_GOOGLE_CLIENT_ID: ${{ secrets.DASHBOARD_GOOGLE_CLIENT_ID }}
+          DASHBOARD_GOOGLE_CLIENT_SECRET: ${{ secrets.DASHBOARD_GOOGLE_CLIENT_SECRET }}
+          DASHBOARD_SESSION_SECRET: ${{ secrets.DASHBOARD_SESSION_SECRET }}
+          DASHBOARD_HMAC_SECRET: ${{ secrets.DASHBOARD_HMAC_SECRET }}
+          DASHBOARD_NATS_SERVER_SEED: ${{ secrets.DASHBOARD_NATS_SERVER_SEED }}
+          DASHBOARD_BROWSER_SEED: ${{ secrets.DASHBOARD_BROWSER_SEED }}
+          ALLOWED_EMAILS: ${{ secrets.ALLOWED_EMAILS }}
+          DOMAIN: ${{ secrets.DOMAIN }}
+        run: |
+          gcloud compute ssh gp_potential2actual_com@nats-mesh-staging \
+            --zone=northamerica-northeast1-b \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --tunnel-through-iap \
+            --quiet \
+            --ssh-flag="-o StrictHostKeyChecking=no" \
+            --command="
+              set -e
+
+              echo '--- Pulling latest mesh-infra ---'
+              cd /opt/mesh-infra
+              sudo git fetch origin main
+              sudo git reset --hard origin/main
+
+              echo '--- Writing secrets to .env ---'
+              cd /opt/mesh-infra/hosts/nats-mesh-staging
+              sudo tee .env > /dev/null <<ENVEOF
+          DASHBOARD_GOOGLE_CLIENT_ID=${DASHBOARD_GOOGLE_CLIENT_ID}
+          DASHBOARD_GOOGLE_CLIENT_SECRET=${DASHBOARD_GOOGLE_CLIENT_SECRET}
+          DASHBOARD_SESSION_SECRET=${DASHBOARD_SESSION_SECRET}
+          DASHBOARD_HMAC_SECRET=${DASHBOARD_HMAC_SECRET}
+          DASHBOARD_NATS_SERVER_SEED=${DASHBOARD_NATS_SERVER_SEED}
+          DASHBOARD_BROWSER_SEED=${DASHBOARD_BROWSER_SEED}
+          ALLOWED_EMAILS=${ALLOWED_EMAILS}
+          DOMAIN=${DOMAIN}
+          ENVEOF
+              sudo chmod 600 .env
+
+              echo '--- Rebuilding containers ---'
+              sudo docker compose up -d --build
+              sleep 5
+
+              echo '--- Reloading NATS config ---'
+              sudo docker kill --signal=SIGHUP nats || true
+              sleep 2
+
+              echo '--- Health checks ---'
+              FAILED=0
+
+              echo 'Checking NATS...'
+              if sudo docker compose ps nats | grep -q 'Up'; then
+                echo '  NATS: OK'
+              else
+                echo '  NATS: FAILED'
+                sudo docker compose logs nats --tail=10
+                FAILED=1
+              fi
+
+              echo 'Checking Dashboard...'
+              if sudo docker compose ps dashboard | grep -q 'Up'; then
+                echo '  Dashboard: OK'
+              else
+                echo '  Dashboard: FAILED'
+                sudo docker compose logs dashboard --tail=10
+                FAILED=1
+              fi
+
+              echo 'Checking Caddy...'
+              if sudo docker compose ps caddy | grep -q 'Up'; then
+                echo '  Caddy: OK'
+              else
+                echo '  Caddy: FAILED'
+                FAILED=1
+              fi
+
+              echo 'Checking NATS config reload...'
+              if sudo docker logs nats --tail=5 2>&1 | grep -q 'Reloaded server configuration'; then
+                echo '  NATS config: Reloaded'
+              else
+                echo '  NATS config: May not have reloaded (check manually)'
+              fi
+
+              if [ \$FAILED -eq 1 ]; then
+                echo '--- DEPLOY FAILED ---'
+                exit 1
+              fi
+
+              echo '--- Deploy successful ---'
+            "
+
+      - name: Cleanup SSH keys
+        if: always()
+        run: |
+          gcloud compute os-login ssh-keys list --format=json 2>/dev/null | \
+            jq -r '.[].key' 2>/dev/null | \
+            while read fp; do
+              [ -n "$fp" ] && gcloud compute os-login ssh-keys remove --key="$fp" --quiet 2>/dev/null
+            done || true
