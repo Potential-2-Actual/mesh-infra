@@ -57,6 +57,9 @@ jobs:
               echo '--- Writing .env from Secret Manager ---'
               echo '${{ steps.secrets.outputs.env_b64 }}' | base64 -d | sudo tee .env > /dev/null
 
+              echo '--- Cleaning stale containers ---'
+              sudo docker compose down --remove-orphans 2>/dev/null || true
+
               echo '--- Restarting services ---'
               sudo docker compose up -d --build
               sleep 10
