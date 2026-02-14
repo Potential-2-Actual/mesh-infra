@@ -51,7 +51,8 @@ jobs:
 
               echo '--- Pulling latest ---'
               sudo git config --global --add safe.directory /opt/mesh-infra
-              sudo git -C /opt/mesh-infra pull origin main
+              sudo git -C /opt/mesh-infra fetch origin main
+              sudo git -C /opt/mesh-infra reset --hard origin/main
 
               echo '--- Writing .env from Secret Manager ---'
               echo '${{ steps.secrets.outputs.env_b64 }}' | base64 -d | sudo tee .env > /dev/null
