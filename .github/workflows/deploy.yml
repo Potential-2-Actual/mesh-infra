@@ -71,11 +71,5 @@ jobs:
               echo '--- Deploy successful ---'
             "
 
-      - name: Cleanup SSH keys
-        if: always()
-        run: |
-          gcloud compute os-login ssh-keys list --format=json 2>/dev/null | \
-            jq -r '.[].key' 2>/dev/null | \
-            while read fp; do
-              [ -n "$fp" ] && gcloud compute os-login ssh-keys remove --key="$fp" --quiet 2>/dev/null
-            done || true
+      # SSH key cleanup removed — runners are ephemeral and concurrent
+      # deploys race on shared OS Login keys when both clean up
