@@ -50,6 +50,7 @@ jobs:
               cd /opt/mesh-infra/hosts/nats-mesh-staging
 
               echo '--- Pulling latest ---'
+              sudo git config --global --add safe.directory /opt/mesh-infra
               sudo git -C /opt/mesh-infra pull origin main
 
               echo '--- Writing .env from Secret Manager ---'
