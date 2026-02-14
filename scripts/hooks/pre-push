@@ -1,0 +1,19 @@
+#!/bin/bash
+# pre-push hook — Validates branch has POT-XXX reference before pushing
+# Install: cp scripts/hooks/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push
+
+BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
+
+# Allow main, develop, release branches
+case "$BRANCH" in
+  main|develop|release/*|hotfix/*) exit 0 ;;
+esac
+
+ISSUE_REF=$(echo "$BRANCH" | grep -oiE 'POT-[0-9]+' | head -1)
+if [ -z "$ISSUE_REF" ]; then
+  echo "❌ Branch '$BRANCH' missing POT-XXX reference."
+  echo "   Rename: git branch -m feat/POT-XXX-description"
+  exit 1
+fi
+
+exit 0
