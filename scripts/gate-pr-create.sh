@@ -15,7 +15,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
-LINEAR_TOKEN="${LINEAR_ACCESS_TOKEN:-}"
+LINEAR_TOKEN="${LINEAR_ACCESS_TOKEN:-${LINEAR_API_KEY:-}}"
 
 # 1. Extract POT-XXX from branch name
 BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
@@ -38,7 +38,7 @@ echo -e "${GREEN}✅ Branch references $ISSUE_REF${NC}"
 if [ -z "$LINEAR_TOKEN" ]; then
   # Try sourcing from bashrc
   source ~/.bashrc 2>/dev/null
-  LINEAR_TOKEN="${LINEAR_ACCESS_TOKEN:-}"
+  LINEAR_TOKEN="${LINEAR_ACCESS_TOKEN:-${LINEAR_API_KEY:-}}"
 fi
 
 if [ -n "$LINEAR_TOKEN" ]; then
