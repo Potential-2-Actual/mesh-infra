@@ -17,7 +17,7 @@ jobs:
       - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Deploy via IAP tunnel
+      - name: Build and encode secrets
         env:
           DASHBOARD_GOOGLE_CLIENT_ID: ${{ secrets.DASHBOARD_GOOGLE_CLIENT_ID }}
           DASHBOARD_GOOGLE_CLIENT_SECRET: ${{ secrets.DASHBOARD_GOOGLE_CLIENT_SECRET }}
@@ -27,6 +27,23 @@ jobs:
           DASHBOARD_BROWSER_SEED: ${{ secrets.DASHBOARD_BROWSER_SEED }}
           ALLOWED_EMAILS: ${{ secrets.ALLOWED_EMAILS }}
           DOMAIN: ${{ secrets.DOMAIN }}
+        run: |
+          # Build .env content and base64 encode to avoid heredoc interpolation issues
+          cat > /tmp/env-raw <<'TEMPLATE'
+          DASHBOARD_GOOGLE_CLIENT_ID=${DASHBOARD_GOOGLE_CLIENT_ID}
+          DASHBOARD_GOOGLE_CLIENT_SECRET=${DASHBOARD_GOOGLE_CLIENT_SECRET}
+          DASHBOARD_SESSION_SECRET=${DASHBOARD_SESSION_SECRET}
+          DASHBOARD_HMAC_SECRET=${DASHBOARD_HMAC_SECRET}
+          DASHBOARD_NATS_SERVER_SEED=${DASHBOARD_NATS_SERVER_SEED}
+          DASHBOARD_BROWSER_SEED=${DASHBOARD_BROWSER_SEED}
+          ALLOWED_EMAILS=${ALLOWED_EMAILS}
+          DOMAIN=${DOMAIN}
+          TEMPLATE
+          envsubst < /tmp/env-raw | sed 's/^[[:space:]]*//' > /tmp/env-resolved
+          echo "ENV_B64=$(base64 -w0 /tmp/env-resolved)" >> "$GITHUB_ENV"
+          rm -f /tmp/env-raw /tmp/env-resolved
+
+      - name: Deploy via IAP tunnel
         run: |
           gcloud compute ssh gp_potential2actual_com@nats-mesh-staging \
             --zone=northamerica-northeast1-b \
@@ -44,16 +61,7 @@ jobs:
 
               echo '--- Writing secrets to .env ---'
               cd /opt/mesh-infra/hosts/nats-mesh-staging
-              sudo tee .env > /dev/null <<ENVEOF
-          DASHBOARD_GOOGLE_CLIENT_ID=${DASHBOARD_GOOGLE_CLIENT_ID}
-          DASHBOARD_GOOGLE_CLIENT_SECRET=${DASHBOARD_GOOGLE_CLIENT_SECRET}
-          DASHBOARD_SESSION_SECRET=${DASHBOARD_SESSION_SECRET}
-          DASHBOARD_HMAC_SECRET=${DASHBOARD_HMAC_SECRET}
-          DASHBOARD_NATS_SERVER_SEED=${DASHBOARD_NATS_SERVER_SEED}
-          DASHBOARD_BROWSER_SEED=${DASHBOARD_BROWSER_SEED}
-          ALLOWED_EMAILS=${ALLOWED_EMAILS}
-          DOMAIN=${DOMAIN}
-          ENVEOF
+              echo '${ENV_B64}' | base64 -d | sudo tee .env > /dev/null
               sudo chmod 600 .env
 
               echo '--- Rebuilding containers ---'
