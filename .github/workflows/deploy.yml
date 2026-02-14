@@ -39,7 +39,7 @@ jobs:
 
       - name: Deploy via IAP tunnel
         run: |
-          gcloud compute ssh gp_potential2actual_com@nats-mesh-staging \
+          gcloud compute ssh nats-mesh-staging \
             --zone=northamerica-northeast1-b \
             --project=falom-platform \
             --tunnel-through-iap \
